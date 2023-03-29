@@ -2,6 +2,7 @@ import shutil
 import os
 from PIL import Image
 from flask import Flask, send_from_directory
+import datetime
 
 app = Flask(__name__)
 
@@ -9,23 +10,23 @@ app = Flask(__name__)
 def static1(path):
     return send_from_directory('static', path)
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
-
-'''
-
-
-
 print ('Введите имя папки с фотографиями')
 input_dir_name = input()
-photos = os.listdir(path='./' + input_dir_name)
+photos = os.listdir(path=input_dir_name)
+print(photos)
 
-import datetime
 dt_now = datetime.datetime.now()
 dt_now_str = str(dt_now)
 
 now = dt_now_str.split(' ')[0]+'_'+dt_now_str.split(' ')[1].split(':')[0]+'-'+dt_now_str.split(' ')[1].split(':')[1]
+
+
+@app.route("/")
+def hello_world():
+    return now
+
+'''
+
 
 os.mkdir('photos_'+ now) 
 os.mkdir('icons_'+ now)
