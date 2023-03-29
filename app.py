@@ -1,6 +1,22 @@
 import shutil
 import os
 from PIL import Image
+from flask import Flask, send_from_directory
+
+app = Flask(__name__)
+
+@app.route("/statiс/<path:path>")
+def static1(path):
+    return send_from_directory('static', path)
+
+@app.route("/")
+def hello_world():
+    return "<p>Hello, World!</p>"
+
+'''
+
+
+
 print ('Введите имя папки с фотографиями')
 input_dir_name = input()
 photos = os.listdir(path='./' + input_dir_name)
@@ -93,3 +109,7 @@ def requests_to_db(params=None):
     connection.commit()
 
 requests_to_db(all_params)
+'''
+
+if __name__ == "__main__":
+    app.run('0.0.0.0', 3010, debug = True)
