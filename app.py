@@ -15,8 +15,8 @@ def hello():
     html = render_template("index.html")
     return html
 
-
-def make_galery():
+@app.route("/gallery")
+def make_gallery():
     input_dir_name = 'images'
     photos = os.listdir(path = input_dir_name)
 
