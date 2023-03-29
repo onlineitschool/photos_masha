@@ -1,7 +1,7 @@
 import shutil
 import os
 from PIL import Image
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, render_template
 import datetime
 
 app = Flask(__name__)
@@ -11,17 +11,13 @@ def static1(path):
     return send_from_directory('static', path)
 
 @app.route("/")
-def hello():
-    return "<p>hello</p>"
+def hello():  
+    html = render_template("index.html")
+    return html
 
-if __name__ == "__main__":
-    app.run('0.0.0.0', 3010, debug = True)
-
-    '''
 
 def make_galery():
-    print ('Введите имя папки с фотографиями')
-    input_dir_name = input()
+    input_dir_name = 'images'
     photos = os.listdir(path = input_dir_name)
 
     dt_now = datetime.datetime.now()
@@ -52,8 +48,8 @@ def make_galery():
         temp_dict['tags'] = None
         temp_dict['comment'] = None
         all_params.append(temp_dict)
-        '''
-'''        
+
+     
         #read the image 
         im = Image.open(old_address_photo) 
 
@@ -73,8 +69,10 @@ def make_galery():
         icons.append(icon_name)
 
         number += 1
+    
+    html = render_template("index.html", icons = icons)
+    return html
 
-'''
 
 
 '''
@@ -124,5 +122,9 @@ def requests_to_db(params=None):
 
 requests_to_db(all_params)
 '''
+
+
+if __name__ == "__main__":
+    app.run('0.0.0.0', 3020, debug = True)
 
 
