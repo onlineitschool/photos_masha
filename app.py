@@ -87,14 +87,23 @@ def make_gallery():
             icons.append(icon_name)
 
             number += 1
+
     paths = {}
+    numbers = {}
 
     for icon in icons:
         icon_tmp = icon
         paths[icon] =  icon_tmp.replace('icon', 'photo')
+        numbers[icon] = int(icon_tmp.split('.')[-2].split('_')[-1])
 
-    html = render_template("index.html", icons = icons, paths = paths) 
-    return html   
+    #html = render_template("index.html", icons = icons, paths = paths) 
+    html = numbers
+    return html  
+
+@app.route("/photo/<photo_id>", methods=['GET'])
+def resize_photo(photo_id):
+    html =  '' 
+    return html  
 
 
 if __name__ == "__main__":
