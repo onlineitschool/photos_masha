@@ -22,11 +22,16 @@ def make_gallery():
     photos = os.listdir(path = input_dir_name)
 
     folders = os.listdir(path = 'static')
+
+    icons = []
     
     if (len(os.listdir(path = 'static')) > 0): 
         folders.sort()
         icon_folder = folders[0]
-        icons = os.listdir(path = 'static/' + icon_folder)
+        icon_list = os.listdir(path = 'static/' + icon_folder)
+        for icon in icon_list:
+            icon = 'static/' + icon_folder + '/' + icon
+            icons.append(icon)
 
     # если папки и файлы раньше НЕ создавались
     if (len(os.listdir(path = 'static')) == 0):
@@ -44,7 +49,6 @@ def make_gallery():
 
         all_params = []
         number = 1
-        icons = []
 
         for photo in photos:
             old_address_photo = input_dir_name + '/' + photo
@@ -89,9 +93,8 @@ def make_gallery():
         icon_tmp = icon
         paths[icon] =  icon_tmp.replace('icon', 'photo')
 
-    html = render_template("index.html", icons = icons, paths = paths)   
+    html = render_template("index.html", icons = icons, paths = paths) 
     return html   
-
 
 
 if __name__ == "__main__":
