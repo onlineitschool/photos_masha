@@ -3,6 +3,7 @@ import os
 from PIL import Image
 from flask import Flask, send_from_directory, render_template
 import datetime
+import mysql.connector
 
 app = Flask(__name__)
 
@@ -29,93 +30,142 @@ def make_gallery():
         folders.sort()
         icon_folder = folders[0]
         icon_list = os.listdir(path = 'static/' + icon_folder)
+        icon_list.sort()
         for icon in icon_list:
             icon = 'static/' + icon_folder + '/' + icon
             icons.append(icon)
 
     # если папки и файлы раньше НЕ создавались
     if (len(os.listdir(path = 'static')) == 0):
-
-        dt_now = datetime.datetime.now()
-        dt_now_str = str(dt_now)
-
-        now = dt_now_str.split(' ')[0]+'_'+dt_now_str.split(' ')[1].split(':')[0]+'-'+dt_now_str.split(' ')[1].split(':')[1]
-
-        os.mkdir('static/photos_'+ now) 
-        os.mkdir('static/icons_'+ now)
-
-        #   with open("static/list_of_photos.txt", "w") as file:
-        #       file.write("hello world")
-
-        all_params = []
-        number = 1
-
-        for photo in photos:
-            old_address_photo = input_dir_name + '/' + photo
-            ext = photo.split('.')[-1]
-            new_address_photo = 'static/photos_'+ now + '/' + 'photo_' + str(number) + '.' + ext
-            shutil.copyfile(old_address_photo, new_address_photo)
-
-            #request = "INSERT INTO `photos` (`folder`, `file`, `user_folder`, `user_file`, `tags`, `comment`)
-            # params = ('photoDDMMYYYY', 'photo1', 'My photos', 'mum.png', None, None) 
-            temp_dict = {}
-            temp_dict['folder'] = 'photos_'+ now
-            temp_dict['file'] = 'photo_' + str(number) + '.' + ext
-            temp_dict['user_folder'] = input_dir_name
-            temp_dict['user_file'] = photo
-            temp_dict['tags'] = None
-            temp_dict['comment'] = None
-            all_params.append(temp_dict)
-
-        
-            #read the image 
-            im = Image.open(old_address_photo) 
-
-            width = im.size[0] 
-            height = im.size[1] 
-
-            #image size
-            icon_width = 100 
-            size=(icon_width,int(icon_width*height/width)) 
-
-            #resize image 
-            out = im.resize(size) 
-
-            #save resized image 
-            icon_name = 'static/icons_'+ now + '/' + 'icon_' + str(number) + '.' + ext
-            out.save(icon_name)
-            icons.append(icon_name)
-
-            number += 1
+        icons = file_processing()
 
     paths = {}
     numbers = {}
 
     for icon in icons:
         icon_tmp = icon
-        paths[icon] =  icon_tmp.replace('icon', 'photo')
         numbers[icon] = int(icon_tmp.split('.')[-2].split('_')[-1])
+        paths[numbers[icon]] =  icon_tmp.replace('icon', 'photo')
 
-    #html = render_template("index.html", icons = icons, paths = paths) 
-    html = numbers
+    html = render_template("index.html", icons = icons, numbers = numbers) 
+    return html 
+
+def ext():
+    input_dir_name = 'images'
+    photos = os.listdir(path = input_dir_name)
+    photo = photos[0]
+    ext = photo.split('.')[-1]
+    return ext
+
+@app.route("/full_size/<photo_id>", methods=['GET'])
+def show_photo(photo_id):
+    url = get_url(photo_id)
+    html = render_template("full_size.html", url=url) 
     return html  
 
-@app.route("/photo/<photo_id>", methods=['GET'])
-def resize_photo(photo_id):
-    html =  '' 
+def get_url(number):
+    folders = os.listdir(path = 'static')
+    folders.sort()
+    photo_folder = folders[1]
+    photo_list = os.listdir(path = 'static/' + photo_folder)
+    photo_list.sort()
+    url =  '../static/' + photo_folder + '/' + photo_list[int(number)-1]
+    return url
+    
+def str_0(number):
+    dop = 5 - len(str(number))
+    return('0'*dop + str(number))
+
+@app.route("/resize/<photo_id>/<width>/<height>", methods=['GET', 'POST'])
+def resize_photo(photo_id, width, height):
+
+    old_address_photo = get_url(photo_id)[3:]
+    ext = old_address_photo.split('.')[-1]
+    new_width = int(width)
+    new_height = int(height)
+
+    resized = resize_image(old_address_photo, new_width, new_height)
+
+    folders = os.listdir(path = 'static')
+    folders.sort()
+    resized_folder = folders[2]
+
+    photo_name = "static/" + resized_folder + '/' + 'photo' + str(photo_id) + "_" + str(new_width) + '_' + str(new_height)  + '.' + ext
+
+    resized.save(photo_name)
+
+    html = '<img src = "/static/resized/photo3_300_700.jpg">'
     return html  
 
+def file_processing():
+    dt_now = datetime.datetime.now()
+    dt_now_str = str(dt_now)
 
-if __name__ == "__main__":
-    app.run('0.0.0.0', 3020, debug = True)
+    now = dt_now_str.split(' ')[0]+'_'+dt_now_str.split(' ')[1].split(':')[0]+'-'+dt_now_str.split(' ')[1].split(':')[1]
 
-'''
+    os.mkdir('static/photos_'+ now) 
+    os.mkdir('static/icons_'+ now)
+    os.mkdir('static/resized_'+ now)
 
+    all_params = []
+    number = 1
 
+    for photo in photos:
+        old_address_photo = input_dir_name + '/' + photo
+        ext = photo.split('.')[-1]
+        new_address_photo = 'static/photos_'+ now + '/' + 'photo_' + str_0(number) + '.' + ext
+        shutil.copyfile(old_address_photo, new_address_photo)
 
-print (all_params)
+        #request = "INSERT INTO `photos` (`folder`, `file`, `user_folder`, `user_file`, `tags`, `comment`)
+        # params = ('photoDDMMYYYY', 'photo1', 'My photos', 'mum.png', None, None) 
+        temp_dict = {}
+        temp_dict['folder'] = 'photos_'+ now
+        temp_dict['file'] = 'photo_' + str_0(number) + '.' + ext
+        temp_dict['user_folder'] = input_dir_name
+        temp_dict['user_file'] = photo
+        temp_dict['tags'] = None
+        temp_dict['comment'] = None
+        all_params.append(temp_dict)
 
-import mysql.connector
+        icon = resize_image(old_address_photo, 100, '')
+        #save resized image 
+        icon_name = 'static/icons_'+ now + '/' + 'icon_' + str_0(number) + '.' + ext
+        icon.save(icon_name)
+        icons.append(icon_name)
+
+        number += 1 
+
+    print (all_params)
+    requests_to_db(all_params) 
+
+    return(icons) 
+
+def resize_image(old_address_photo, new_width, new_height):
+
+    #read the image 
+    im = Image.open(old_address_photo) 
+
+    width = im.size[0] 
+    height = im.size[1] 
+
+    #image size
+    if new_height == "" and new_width == "":
+         size=(width, height)
+
+    elif new_height == "":
+        size=(new_width,int(new_width * height/width)) 
+
+    elif new_width == "":
+        size=(int(new_height * width/height, new_height)) 
+    
+    else:
+        size = (new_width, new_height)
+
+    #resize image 
+    out = im.resize(size) 
+
+    return out
+
 
 def connection_db():
     try:
@@ -135,7 +185,6 @@ def connection_db():
 def requests_to_db(params=None): 
     connection = connection_db()
 
-    #здесь один запрос, но их надо отправлять в цикле
     mycursor = connection.cursor(dictionary=True)
 
     for param in all_params:
@@ -153,12 +202,10 @@ def requests_to_db(params=None):
     
         mycursor.execute(request, params)
 
-         # Это завершение работы с БД и сохранение изменений
-    connection.commit()
+    connection.commit()     
 
-requests_to_db(all_params)
-'''
-
+if __name__ == "__main__":
+    app.run('0.0.0.0', 3020, debug = True)
 
 
 

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Photo big size</title>
+<body>
+    <table width = 100%>
+        <tr width = 100%>
+            <td  width = 50%>
+                <form action="/resize">
+                    <label for="fname">Width:</label><br>
+                    <input type="number"> px<br>
+                        
+                    <label for="fname">Height:</label><br>
+                    <input type="number"> px<br>
+                    <input type="submit" value="Submit">
+                  </form>
+            </td>  
+            <td  width = 50%>
+                    Resize: choose either width OR height 
+                    <br>
+                    (if you want to keep proportions, don't type both).
+            </td>
+        </tr>
+    </table>
+
+<img src="{{ url }}" width = 100%>
+
+</body>
