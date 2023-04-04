@@ -81,8 +81,9 @@ def resize_photo(photo_id, width, height):
 
     old_address_photo = get_url(photo_id)[3:]
     ext = old_address_photo.split('.')[-1]
-    new_width = int(width)
-    new_height = int(height)
+
+    new_width = width
+    new_height = height
 
     resized = resize_image(old_address_photo, new_width, new_height)
 
@@ -151,16 +152,20 @@ def resize_image(old_address_photo, new_width, new_height):
     height = im.size[1] 
 
     #image size
-    if new_height == "" and new_width == "":
+    if new_height == "s" and new_width == "s":
          size=(width, height)
 
-    elif new_height == "":
+    elif new_height == "s":
+        new_width = int(new_width)
         size=(new_width,int(new_width * height/width)) 
 
-    elif new_width == "":
-        size=(int(new_height * width/height, new_height)) 
+    elif new_width == "s":
+        new_height = int(new_height)
+        size=(int(new_height * width/height), new_height)
     
     else:
+        new_width = int(new_width)
+        new_height = int(new_height)
         size = (new_width, new_height)
 
     #resize image 
