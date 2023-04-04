@@ -94,7 +94,9 @@ def resize_photo(photo_id, width, height):
 
     resized.save(photo_name)
 
-    html = '<img src = "/static/resized/photo3_300_700.jpg">'
+    #html = '<img src = "/static/resized/photo3_300_700.jpg">'
+
+    html = '<img src = "/' + photo_name + '" height="' + str(new_height) + '">'
     return html  
 
 def file_processing():
