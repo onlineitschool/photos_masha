@@ -16,47 +16,6 @@ def hello():
     html = "hello"
     return html
 
-@app.route("/gallery")
-def make_gallery():
-
-    input_dir_name = 'images'
-    photos = os.listdir(path = input_dir_name)
-
-    folders = os.listdir(path = 'static')
-
-    icons = []
-    
-    if (len(os.listdir(path = 'static')) > 0): 
-        folders.sort()
-        icon_folder = folders[0]
-        icon_list = os.listdir(path = 'static/' + icon_folder)
-        icon_list.sort()
-        for icon in icon_list:
-            icon = 'static/' + icon_folder + '/' + icon
-            icons.append(icon)
-
-    # если папки и файлы раньше НЕ создавались
-    if (len(os.listdir(path = 'static')) == 0):
-        icons = file_processing()
-
-    paths = {}
-    numbers = {}
-
-    for icon in icons:
-        icon_tmp = icon
-        numbers[icon] = int(icon_tmp.split('.')[-2].split('_')[-1])
-        paths[numbers[icon]] =  icon_tmp.replace('icon', 'photo')
-
-    html = render_template("index.html", icons = icons, numbers = numbers) 
-    return html 
-
-def ext():
-    input_dir_name = 'images'
-    photos = os.listdir(path = input_dir_name)
-    photo = photos[0]
-    ext = photo.split('.')[-1]
-    return ext
-
 @app.route("/full_size/<photo_id>", methods=['GET'])
 def show_photo(photo_id):
     url = get_url(photo_id)
@@ -101,9 +60,12 @@ def resize_photo(photo_id, width, height):
     return html  
 
 def file_processing():
+    input_dir_name = 'images'
+    photos = os.listdir(path = input_dir_name)
+    print(photos)
+
     dt_now = datetime.datetime.now()
     dt_now_str = str(dt_now)
-
     now = dt_now_str.split(' ')[0]+'_'+dt_now_str.split(' ')[1].split(':')[0]+'-'+dt_now_str.split(' ')[1].split(':')[1]
 
     os.mkdir('static/photos_'+ now) 
@@ -113,7 +75,10 @@ def file_processing():
     all_params = []
     number = 1
 
+    icons = []
+
     for photo in photos:
+
         old_address_photo = input_dir_name + '/' + photo
         ext = photo.split('.')[-1]
         new_address_photo = 'static/photos_'+ now + '/' + 'photo_' + str_0(number) + '.' + ext
@@ -130,16 +95,18 @@ def file_processing():
         temp_dict['comment'] = None
         all_params.append(temp_dict)
 
-        icon = resize_image(old_address_photo, 100, '')
+        icon = resize_image(old_address_photo, '100', 's')
         #save resized image 
         icon_name = 'static/icons_'+ now + '/' + 'icon_' + str_0(number) + '.' + ext
         icon.save(icon_name)
         icons.append(icon_name)
 
+        sleep(0.5)
         number += 1 
 
-    print (all_params)
-    requests_to_db(all_params) 
+    #print (all_params)
+    #requests_to_db(all_params) 
+    print(icons)
 
     return(icons) 
 
@@ -172,6 +139,40 @@ def resize_image(old_address_photo, new_width, new_height):
     out = im.resize(size) 
 
     return out
+
+@app.route("/gallery")
+def make_gallery():
+    print('make gallery')
+
+    folders = os.listdir(path = 'static')
+    print(os.listdir(path = 'static'))
+
+    icons = []
+    
+
+    if (len(os.listdir(path = 'static')) > 0): 
+        folders.sort()
+        icon_folder = folders[0]
+        icon_list = os.listdir(path = 'static/' + icon_folder)
+        icon_list.sort()
+        for icon in icon_list:
+            icon = 'static/' + icon_folder + '/' + icon
+            icons.append(icon)
+
+    if (len(os.listdir(path = 'static')) == 0):
+        print(os.listdir(path = 'static'))
+        icons = file_processing()
+
+    paths = {}
+    numbers = {}
+
+    for icon in icons:
+        icon_tmp = icon
+        numbers[icon] = int(icon_tmp.split('.')[-2].split('_')[-1])
+        paths[numbers[icon]] =  icon_tmp.replace('icon', 'photo')
+
+    html = render_template("index.html", icons = icons, numbers = numbers) 
+    return html 
 
 
 def connection_db():

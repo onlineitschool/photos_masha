@@ -18,7 +18,12 @@ def make_gallery():
 
     folders = os.listdir(path = 'static')
     folders.sort()
-    icon_folder = folders[0]
+    print('folders', folders)
+
+    return 'hello'
+    
+    '''
+    #icon_folder = folders[0]
     url = 'static/icons_2023-04-02_16-14'
     icon_list = os.listdir(path = url)
     icons = []
@@ -28,7 +33,8 @@ def make_gallery():
         icons.append(icon_name)
         
     html = render_template("index.html", icons = icons)   
-    return html    
+    return html  
+    '''  
 
 if __name__ == "__main__":
     app.run('0.0.0.0', 3010, debug = True)   
