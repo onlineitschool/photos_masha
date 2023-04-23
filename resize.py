@@ -14,7 +14,7 @@ def static1(path):
 
 @app.route("/")
 def hello():  
-    html = "hello"
+    html = 'hello'
     return html
 
 @app.route("/full_size/<photo_id>", methods=['GET'])
