@@ -24,4 +24,4 @@ def upload_file(file_name, bucket, object_name=None):
         return False
     return True
 
-upload_file("images/DSC_6206.jpg", 'photos', object_name='22_04_2023/DSC_6206.jpg')
+upload_file("README.md", 'photos', object_name="README.md")
