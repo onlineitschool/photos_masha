@@ -35,7 +35,7 @@ def S3():
 
 @app.route("/direct/<file>")
 def direct_file(file):
-    object_name = "photos_2023-04-14_12-05/photo_00001.jpg"
+    object_name = "/static/photos_2023-04-27_07-19/photo_00002.jpg"
     response_s3 = s3_client.get_object(Bucket='photos', Key=object_name)
     response_s3_body = response_s3["Body"]
 

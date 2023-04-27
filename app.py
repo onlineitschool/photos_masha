@@ -33,6 +33,11 @@ s3_client = session.client(
         endpoint_url='https://u1.s3api.itschool.cloud'
     )
 
+def get_file(bucket, object_name):
+    response = s3_client.get_object(Bucket=bucket, Key=object_name)
+    response = response["Body"]
+    return response
+
 def upload_file(file_name, bucket, object_name=None):
     # If S3 object_name was not specified, use file_name
     if object_name is None:
@@ -78,7 +83,7 @@ def file_processing():
         old_address_photo = input_dir_name + '/' + photo
         ext = photo.split('.')[-1]
         new_address_photo = 'static/photos_'+ now + '/' + 'photo_' + str_0(number) + '.' + ext
-        shutil.copyfile(old_address_photo, new_address_photo)
+        # shutil.copyfile(old_address_photo, new_address_photo)
         upload_file(old_address_photo, 'photos', new_address_photo)
 
         icon = resize_image(old_address_photo, '100', 's')
@@ -165,17 +170,28 @@ def make_gallery():
 @app.route("/full_size/<photo_id>", methods=['GET'])
 def show_photo(photo_id):
     url = get_url(photo_id)
+    my_file = open(url[3:], "w+")
+    s3_url = url[3:]
+    obj = get_file('photos', s3_url)
+
+    with io.FileIO(url[3:], 'w') as file:
+        for i in obj:
+            file.write(i)
+       
     html = render_template("full_size.html", photo_id=photo_id, url=url) 
     return html 
 
 def get_url(number):
     folders = os.listdir(path = 'static')
     folders.sort()
+    icon_folder = folders[0]
     photo_folder = folders[1]
-    photo_list = os.listdir(path = 'static/' + photo_folder)
-    photo_list.sort()
-    url =  '../static/' + photo_folder + '/' + photo_list[int(number)-1]
-    return url
+    icon_list = os.listdir(path = 'static/' + icon_folder)
+    icon_list.sort()
+    icon_url =  '../static/' + photo_folder + '/' + icon_list[int(number)-1]
+    photo_url = icon_url.replace("icon", "photo", 1)
+    print(photo_url)
+    return photo_url
     
 @app.route("/resize/<photo_id>", methods=['GET', 'POST'])
 def resize(photo_id):
