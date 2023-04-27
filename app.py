@@ -165,12 +165,12 @@ def make_gallery():
     return html  
 
 # Show full-size file from s3 and save it nearby
-# Resize file from nearby, download it to user's computer and upload to s3
 
 @app.route("/full_size/<photo_id>", methods=['GET'])
 def show_photo(photo_id):
     url = get_url(photo_id)
-    my_file = open(url[3:], "w+")
+    if not os.path.exists(url[3:]):
+        my_file = open(url[3:], "w")
     s3_url = url[3:]
     obj = get_file('photos', s3_url)
 
@@ -192,7 +192,8 @@ def get_url(number):
     photo_url = icon_url.replace("icon", "photo", 1)
     print(photo_url)
     return photo_url
-    
+
+# Resize file from nearby, download it to user's computer and upload to s3   
 @app.route("/resize/<photo_id>", methods=['GET', 'POST'])
 def resize(photo_id):
     width = request.form["width"]
@@ -221,6 +222,7 @@ def resize_photo(photo_id, width, height):
     photo_name = "static/" + resized_folder + '/' + 'photo' + str(photo_id) + "_" + str(new_width) + '_' + str(new_height)  + '.' + ext
 
     resized.save(photo_name)
+    upload_file(photo_name, 'photos', photo_name)
 
     html = '<img src = "/' + photo_name + '" height="' + str(new_height) + '">'
     return html 
@@ -229,7 +231,6 @@ def resize_photo(photo_id, width, height):
 def resized(photo_id, width, height):
     html = resize_photo(photo_id, width, height)
     return html
-
 
 if __name__ == "__main__":
     app.run('0.0.0.0', 3020, debug = True)
